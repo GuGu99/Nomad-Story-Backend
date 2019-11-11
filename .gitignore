@@ -59,3 +59,8 @@ typings/
 
 # next.js build output
 .next
+
+lib/
+package-lock.json
+src/config/dbconfig.json
+package-lock.json
