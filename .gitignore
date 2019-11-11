@@ -61,6 +61,5 @@ typings/
 .next
 
 lib/
-package-lock.json
 src/config/dbconfig.json
-package-lock.json
+test.js

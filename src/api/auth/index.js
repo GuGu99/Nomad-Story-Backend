@@ -1,7 +1,7 @@
 import Router from 'koa-router';
-import { ping } from './auth.ctrl';
-
+import { Register } from './auth.ctrl';
 const auth = new Router();
 
-auth.get('/ping', ping);
+auth.post('/register', Register);
+
 export default auth;
