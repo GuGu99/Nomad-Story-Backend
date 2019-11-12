@@ -1,9 +1,9 @@
-export const User = (sequelize, DataTypes) => {
+export const User = (sequelize, DataTypes) =>{
     return sequelize.define('user', {
         user_id : {
-            type : DataTypes.STRING,
-            primaryKey : true,
-            autoIncrement : true
+            type : DataTypes.STRING(20),
+            allowNull : false,
+            unique : true
         },
         username : {
             type : DataTypes.STRING(20),
@@ -15,12 +15,9 @@ export const User = (sequelize, DataTypes) => {
             allowNull : false
         },
         email : {
-            type : DataTypes.STRING,
-            allowNull : false
-        },
-        secret_key : {
-            type : DataTypes.STRING,
-            allowNull : false
-        },
+            type : DataTypes.STRING(20),
+            allowNull : false,
+            unique : true
+        }
     });
 }

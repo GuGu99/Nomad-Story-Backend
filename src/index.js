@@ -10,7 +10,9 @@ const router = new Router();
 import api from './api';
 
 import { sequelize } from './models';
-sequelize.sync();
+sequelize.sync().then(() => {
+    console.log("DB Sync");
+});
 
 import bodyParser from 'koa-bodyparser';
 
