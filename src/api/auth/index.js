@@ -1,8 +1,8 @@
 import Router from 'koa-router';
-import { Register, Test } from './auth.ctrl';
+import { Register, Login } from './auth.ctrl';
 const auth = new Router();
 
 auth.post('/register', Register);
-auth.post('/test', Test);
+auth.post('/login', Login);
 
 export default auth;
