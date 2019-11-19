@@ -3,7 +3,6 @@ import crypto from 'crypto';
 import { user } from '../../models';
 
 import dotenv from 'dotenv';
-import { changeExt } from 'upath';
 dotenv.config();
 
 export const Register = async(ctx) => {
@@ -79,22 +78,16 @@ export const Login = async(ctx) => {
         };
     }
 
-    // Login API에서 Password 토큰으로 로그인 요청
-    // 사용자 입력 -> 입력한 패스워드를 토큰화 -> 토큰된 암호와 DB암호 비교 -> 로그인 요청
-
     const hashedPassword = crypto.createHmac('sha256', process.env.Password_KEY).update(ctx.request.body.password).digest('hex');
-    const dbPassword = await user.findOne(password, { where : {password : hashedPassword}});
-    
-    console.log(dbPassword);
-    // if (hashedPassword != dbPassword){
-    //     console.log("로그인 - 패스워드가 틀렸습니다.");
-    //     ctx.status = 400;
-    //     ctx.body = {
-    //         "error" : "004",
-    //         "meesage" : "패스워드가 틀렸습니다."
-    //     }
-    // }
-    // console.log("로그인 진행");
+    if (idFound.password != hashedPassword){
+        console.log("로그인 - 패스워드가 틀렸습니다.");
+        ctx.status = 400;
+        ctx.body = {
+            "error" : "004",
+            "meesage" : "패스워드가 틀렸습니다."
+        }
+    }
 
-    
+    console.log("로그인 진행");
+    // 토큰 추가
 };
