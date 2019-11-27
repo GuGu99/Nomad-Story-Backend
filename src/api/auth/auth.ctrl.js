@@ -5,17 +5,28 @@ import { user } from '../../models';
 import dotenv from 'dotenv';
 dotenv.config();
 
-export const Register = async(ctx) => {
-    console.log(ctx.request.body);
-    const Registeration = Joi.object().keys({
-        user_id : Joi.string().alphanum().min(6).max(15).required(),
-        username : Joi.string().alphanum().min(2).max(15).required(),
-        password : Joi.string().min(6).required(),
-        email : Joi.string().email().max(20).required()
-    });
+// POST api/auth/signup
+export const signup = async(ctx) => {
+    const Registeration = Joi.object({
+        user_id : Joi.string()
+            .required()
+            .alphanum()
+            .min(6)
+            .max(15),
+        username : Joi.string()
+            .alphanum()
+            .min(2)
+            .max(15)
+            .required(),
+        password : Joi.string()
+            .min(6)
+            .required(),
+        email : Joi.string()
+            .email()
+            .required()
+    }).vaildate(ctx.request.body);
 
-    const result = Joi.validate(ctx.request.body, Registeration);
-    if(result.error) {
+    if(Registeration.error) {
         console.log("회원가입 - 올바르지 않은 조이 형식입니다.")
         ctx.status = 400;
         ctx.body = { 
@@ -50,8 +61,8 @@ export const Register = async(ctx) => {
 };
 
 
-
-export const Login = async(ctx) => {
+// POST api/auth/signin
+export const signin = async(ctx) => {
     const LoginInput = Joi.object().keys({
         user_id : Joi.string().alphanum().min(6).max(15).required(),
         password : Joi.string().min(6).required()
@@ -89,5 +100,6 @@ export const Login = async(ctx) => {
     }
 
     console.log("로그인 진행");
+    ctx.body = "로그인";
     // 토큰 추가
 };
