@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import crypto from 'crypto';
 import { user } from '../../models';
-import {generateToken} from '../../lib'
+import {generateToken} from '../../lib/token'
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -116,12 +116,16 @@ export const signin = async(ctx) => {
     }
 
     let token;
+    const payload = {
+        user_id : findUserId.user_id
+    };
+
     try {
-        token = await generateToken(user.dataValues);
+        token = await generateToken(payload);
     } catch (error) {
         ctx.throw(500, error);
     }
 
-    console.log(`로그인 : ${user.user_id}`);
+    console.log(`로그인 : ${findUserId.user_id}`);
     ctx.body = token;
 };
