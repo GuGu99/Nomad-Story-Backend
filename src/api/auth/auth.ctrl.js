@@ -23,30 +23,28 @@ const signupVaildate = (userParams) => {
         email : Joi.string()
             .required()
             .email(),
-    }).validate(signupJoiObject, userParams);
+    }).validate(userParams);
 }
 
 // POST api/auth/signup
 export const signup = async(ctx) => {
-    const userSignupInfo = ctx.request.body;
-    const signupFormCheck = signupVaildate(...userSignupInfo);
+    const signupFormCheck = signupVaildate(...ctx.request.body);
     if(signupFormCheck.error) {
-        console.log("회원가입 - 올바르지 않은 조이 형식입니다.")
-        ctx.status = 400;
-        ctx.body = { 
-            "error" : "001",
-            "message" : "올바르지 않은 조이 형식입니다."
-        };
+        ctx.throw(400, '양식이 맞지 않습니다.', { "err_code": "001" });
         return;
     }
-    const idIsExist = await user.findOne({ where : { user_id : ctx.request.body.user_id } });
+
+    const {user_id, username, password, email} = ctx.request.body;
+    let idIsExist;
+
+    try{
+        idIsExist = await user.findOne({ where : { user_id } });
+    }catch(error){
+        ctx.throw(500, error);
+    }
+
     if (idIsExist != null){
-        console.log("회원가입 - 이미 존재하는 아이디 입니다.");
-        ctx.status = 409;
-        ctx.body = { 
-            "error" : "002", 
-            "message" : "이미 존재하는 아이디 입니다."
-        };
+        ctx.throw(409, '이미 존재하는 아이디입니다.', { "err_code": "002" });
         return;
     }
     const new_pwd = crypto.createHmac('sha256', process.env.Password_KEY).update(ctx.request.body.password).digest('hex');
@@ -59,7 +57,7 @@ export const signup = async(ctx) => {
         "email" : ctx.request.body.email
     });
 
-    console.log(`회원가입 완료. 아이디 - ${new_user.id}`)
+    console.log(`회원가입 완료. 아이디 - ${new_user.id}`);
     ctx.status = 200;
     ctx.body = { "id" : new_user.id };
 };
