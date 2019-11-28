@@ -89,34 +89,30 @@ export const signup = async(ctx) => {
 export const signin = async(ctx) => {
     const signinFormCheck = signinVaildate(...ctx.request.body);
     if (signinFormCheck.error){
-        ctx.throw(400, '양식이 맞지 않습니다.', { "err_code": "001" });
+        ctx.throw(400, "양식이 맞지 않습니다.", { "err_code": "001" });
         return;
     }
     
-    const idFound = await user.findOne({ where : {user_id : ctx.request.body.user_id}});
-    if (idFound == null){
-        console.log("로그인 - 존재하지 않는 아이디 입니다.");
-        ctx.status = 400;
-        ctx.body = {
-            "error" : "003",
-            "message" : "존재하지 않는 아이디 입니다."
-        };
+    const {user_id, username, password, email} = ctx.request.body;
+    let findUserId;
+
+    try{
+        findUserId = await user.findOne({ where : { user_id } });
+    } catch (error) {
+        ctx.throw(500, error);
+    }
+
+    if (findUserId == null){
+        ctx.throw(400, "존재하지 않는 아이디 입니다.", { "err_code" : "003" });
         return;
     }
 
-    const hashedPassword = crypto.createHmac('sha256', process.env.Password_KEY).update(ctx.request.body.password).digest('hex');
-    if (idFound.password != hashedPassword){
-        console.log("로그인 - 패스워드가 틀렸습니다.");
-        ctx.status = 400;
-        ctx.body = {
-            "error" : "004",
-            "meesage" : "패스워드가 틀렸습니다."
-        }
+    const hashedPw = createAndReturnHash();
+    if (findUserId.password != hashedPw){
+        ctx.throw(400, "비밀번호가 일치하지 않습니다", {"err_code" : "004"});
         return;
     }
 
     console.log("로그인 진행");
-    ctx.body = "로그인 완료";
     // 토큰 추가
-
 };
