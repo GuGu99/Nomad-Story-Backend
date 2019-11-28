@@ -24,11 +24,24 @@ const signupVaildate = (userParams) => {
             .required()
             .email(),
     }).validate(userParams);
-}
+};
+
+const signinVaildate = (userParams) => { 
+    return Joi.object({
+        user_id : Joi.string()
+            .alphanum()
+            .min(6)
+            .max(15)
+            .required(),
+        password : Joi.string()
+            .min(6)
+            .required()
+    }).validate(userParams);
+};
 
 const createAndReturnHash = () =>{
     return crypto.createHmac('sha256', process.env.Password_KEY);
-}
+};
 
 // POST api/auth/signup
 export const signup = async(ctx) => {
@@ -74,25 +87,9 @@ export const signup = async(ctx) => {
 
 // POST api/auth/signin
 export const signin = async(ctx) => {
-    const LoginInput = Joi.object().keys({
-        user_id : Joi.string()
-            .alphanum()
-            .min(6)
-            .max(15)
-            .required(),
-        password : Joi.string()
-            .min(6)
-            .required()
-    });
-
-    const LoginResult = Joi.validate(ctx.request.body, LoginInput);
-    if (LoginResult.error){
-        console.log("로그인 - 올바르지 않은 조이 형식입니다.")
-        ctx.status = 400;
-        ctx.body = { 
-            "error" : "001",
-            "message" : "올바르지 않은 조이 형식입니다."
-        };
+    const signinFormCheck = signinVaildate(...ctx.request.body);
+    if (signinFormCheck.error){
+        ctx.throw(400, '양식이 맞지 않습니다.', { "err_code": "001" });
         return;
     }
     
