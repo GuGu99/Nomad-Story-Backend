@@ -5,28 +5,32 @@ import { user } from '../../models';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// POST api/auth/signup
-export const signup = async(ctx) => {
-    const Registeration = Joi.object({
+const signupVaildate = (userParams) => { 
+    return Joi.object({
         user_id : Joi.string()
             .required()
             .alphanum()
             .min(6)
             .max(15),
         username : Joi.string()
+            .required()
             .alphanum()
             .min(2)
-            .max(15)
-            .required(),
+            .max(15),
         password : Joi.string()
-            .min(6)
-            .required(),
-        email : Joi.string()
-            .email()
             .required()
-    }).vaildate(ctx.request.body);
+            .min(6),
+        email : Joi.string()
+            .required()
+            .email(),
+    }).validate(signupJoiObject, userParams);
+}
 
-    if(Registeration.error) {
+// POST api/auth/signup
+export const signup = async(ctx) => {
+    const userSignupInfo = ctx.request.body;
+    const signupFormCheck = signupVaildate(...userSignupInfo);
+    if(signupFormCheck.error) {
         console.log("회원가입 - 올바르지 않은 조이 형식입니다.")
         ctx.status = 400;
         ctx.body = { 
@@ -64,8 +68,14 @@ export const signup = async(ctx) => {
 // POST api/auth/signin
 export const signin = async(ctx) => {
     const LoginInput = Joi.object().keys({
-        user_id : Joi.string().alphanum().min(6).max(15).required(),
-        password : Joi.string().min(6).required()
+        user_id : Joi.string()
+            .alphanum()
+            .min(6)
+            .max(15)
+            .required(),
+        password : Joi.string()
+            .min(6)
+            .required()
     });
 
     const LoginResult = Joi.validate(ctx.request.body, LoginInput);
@@ -87,6 +97,7 @@ export const signin = async(ctx) => {
             "error" : "003",
             "message" : "존재하지 않는 아이디 입니다."
         };
+        return;
     }
 
     const hashedPassword = crypto.createHmac('sha256', process.env.Password_KEY).update(ctx.request.body.password).digest('hex');
@@ -97,9 +108,11 @@ export const signin = async(ctx) => {
             "error" : "004",
             "meesage" : "패스워드가 틀렸습니다."
         }
+        return;
     }
 
     console.log("로그인 진행");
     ctx.body = "로그인";
     // 토큰 추가
+
 };
