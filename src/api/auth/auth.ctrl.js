@@ -26,6 +26,10 @@ const signupVaildate = (userParams) => {
     }).validate(userParams);
 }
 
+const createAndReturnHash = () =>{
+    return crypto.createHmac('sha256', process.env.Password_KEY);
+}
+
 // POST api/auth/signup
 export const signup = async(ctx) => {
     const signupFormCheck = signupVaildate(...ctx.request.body);
@@ -47,19 +51,24 @@ export const signup = async(ctx) => {
         ctx.throw(409, '이미 존재하는 아이디입니다.', { "err_code": "002" });
         return;
     }
-    const new_pwd = crypto.createHmac('sha256', process.env.Password_KEY).update(ctx.request.body.password).digest('hex');
-    
-    console.log(ctx.request.body);
-    const new_user = await user.create({
-        "user_id" : ctx.request.body.user_id,
-        "username" : ctx.request.body.username,
-        "password" : new_pwd,
-        "email" : ctx.request.body.email
-    });
 
-    console.log(`회원가입 완료. 아이디 - ${new_user.id}`);
-    ctx.status = 200;
-    ctx.body = { "id" : new_user.id };
+    const hashed_pw = createAndReturnHash();
+    const signup_data = {
+        user_id,
+        username,
+        password : hashed_pw.update(password).digest('hex'),
+        email
+    }
+    
+    let new_user;
+    try{
+        new_user = await user.create(signup_data);
+    } catch (error) {
+        ctx.throw(500, error);
+    } 
+
+    console.log(`회원가입 : ${signup_data.user_id}`);
+    ctx.body = new_user;
 };
 
 
@@ -110,7 +119,7 @@ export const signin = async(ctx) => {
     }
 
     console.log("로그인 진행");
-    ctx.body = "로그인";
+    ctx.body = "로그인 완료";
     // 토큰 추가
 
 };
