@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import crypto from 'crypto';
 import { user } from '../../models';
+import {generateToken} from '../../lib'
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -65,11 +66,11 @@ export const signup = async(ctx) => {
         return;
     }
 
-    const hashed_pw = createAndReturnHash();
+    const hashed = createAndReturnHash();
     const signup_data = {
         user_id,
         username,
-        password : hashed_pw.update(password).digest('hex'),
+        password : hashed.update(password).digest('hex'),
         email
     }
     
@@ -93,7 +94,7 @@ export const signin = async(ctx) => {
         return;
     }
     
-    const {user_id, username, password, email} = ctx.request.body;
+    const { user_id, password } = ctx.request.body;
     let findUserId;
 
     try{
@@ -107,12 +108,20 @@ export const signin = async(ctx) => {
         return;
     }
 
-    const hashedPw = createAndReturnHash();
-    if (findUserId.password != hashedPw){
+    const hashedSigninPw = createAndReturnHash()
+        .update(password).digest('hex');
+    if (findUserId.password != hashedSigninPw){
         ctx.throw(400, "비밀번호가 일치하지 않습니다", {"err_code" : "004"});
         return;
     }
 
-    console.log("로그인 진행");
-    // 토큰 추가
+    let token;
+    try {
+        token = await generateToken(user.dataValues);
+    } catch (error) {
+        ctx.throw(500, error);
+    }
+
+    console.log(`로그인 : ${user.user_id}`);
+    ctx.body = token;
 };
