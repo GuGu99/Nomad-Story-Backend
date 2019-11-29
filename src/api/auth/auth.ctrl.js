@@ -46,9 +46,10 @@ const createAndReturnHash = () =>{
 
 // POST api/auth/signup
 export const signup = async(ctx) => {
-    const signupFormCheck = signupVaildate(...ctx.request.body);
+    const signupFormCheck = signupVaildate(ctx.request.body);
     if(signupFormCheck.error) {
         ctx.throw(400, '양식이 맞지 않습니다.', { "err_code": "001" });
+        console.error(signupFormCheck.error);
         return;
     }
 
@@ -88,7 +89,7 @@ export const signup = async(ctx) => {
 
 // POST api/auth/signin
 export const signin = async(ctx) => {
-    const signinFormCheck = signinVaildate(...ctx.request.body);
+    const signinFormCheck = signinVaildate(ctx.request.body);
     if (signinFormCheck.error){
         ctx.throw(400, "양식이 맞지 않습니다.", { "err_code": "001" });
         return;
