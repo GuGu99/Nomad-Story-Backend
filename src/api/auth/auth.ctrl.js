@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import crypto from 'crypto';
 import { user } from '../../models';
+import {generateToken} from '../../lib/token'
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -24,17 +25,31 @@ const signupVaildate = (userParams) => {
             .required()
             .email(),
     }).validate(userParams);
-}
+};
+
+const signinVaildate = (userParams) => { 
+    return Joi.object({
+        user_id : Joi.string()
+            .alphanum()
+            .min(6)
+            .max(15)
+            .required(),
+        password : Joi.string()
+            .min(6)
+            .required()
+    }).validate(userParams);
+};
 
 const createAndReturnHash = () =>{
     return crypto.createHmac('sha256', process.env.Password_KEY);
-}
+};
 
 // POST api/auth/signup
 export const signup = async(ctx) => {
-    const signupFormCheck = signupVaildate(...ctx.request.body);
+    const signupFormCheck = signupVaildate(ctx.request.body);
     if(signupFormCheck.error) {
         ctx.throw(400, '양식이 맞지 않습니다.', { "err_code": "001" });
+        console.error(signupFormCheck.error);
         return;
     }
 
@@ -52,11 +67,11 @@ export const signup = async(ctx) => {
         return;
     }
 
-    const hashed_pw = createAndReturnHash();
+    const hashed = createAndReturnHash();
     const signup_data = {
         user_id,
         username,
-        password : hashed_pw.update(password).digest('hex'),
+        password : hashed.update(password).digest('hex'),
         email
     }
     
@@ -74,52 +89,44 @@ export const signup = async(ctx) => {
 
 // POST api/auth/signin
 export const signin = async(ctx) => {
-    const LoginInput = Joi.object().keys({
-        user_id : Joi.string()
-            .alphanum()
-            .min(6)
-            .max(15)
-            .required(),
-        password : Joi.string()
-            .min(6)
-            .required()
-    });
-
-    const LoginResult = Joi.validate(ctx.request.body, LoginInput);
-    if (LoginResult.error){
-        console.log("로그인 - 올바르지 않은 조이 형식입니다.")
-        ctx.status = 400;
-        ctx.body = { 
-            "error" : "001",
-            "message" : "올바르지 않은 조이 형식입니다."
-        };
+    const signinFormCheck = signinVaildate(ctx.request.body);
+    if (signinFormCheck.error){
+        ctx.throw(400, "양식이 맞지 않습니다.", { "err_code": "001" });
         return;
     }
     
-    const idFound = await user.findOne({ where : {user_id : ctx.request.body.user_id}});
-    if (idFound == null){
-        console.log("로그인 - 존재하지 않는 아이디 입니다.");
-        ctx.status = 400;
-        ctx.body = {
-            "error" : "003",
-            "message" : "존재하지 않는 아이디 입니다."
-        };
+    const { user_id, password } = ctx.request.body;
+    let findUserId;
+
+    try{
+        findUserId = await user.findOne({ where : { user_id } });
+    } catch (error) {
+        ctx.throw(500, error);
+    }
+
+    if (findUserId == null){
+        ctx.throw(400, "존재하지 않는 아이디 입니다.", { "err_code" : "003" });
         return;
     }
 
-    const hashedPassword = crypto.createHmac('sha256', process.env.Password_KEY).update(ctx.request.body.password).digest('hex');
-    if (idFound.password != hashedPassword){
-        console.log("로그인 - 패스워드가 틀렸습니다.");
-        ctx.status = 400;
-        ctx.body = {
-            "error" : "004",
-            "meesage" : "패스워드가 틀렸습니다."
-        }
+    const hashedSigninPw = createAndReturnHash()
+        .update(password).digest('hex');
+    if (findUserId.password != hashedSigninPw){
+        ctx.throw(400, "비밀번호가 일치하지 않습니다", {"err_code" : "004"});
         return;
     }
 
-    console.log("로그인 진행");
-    ctx.body = "로그인 완료";
-    // 토큰 추가
+    let token;
+    const payload = {
+        user_id : findUserId.user_id
+    };
 
+    try {
+        token = await generateToken(payload);
+    } catch (error) {
+        ctx.throw(500, error);
+    }
+
+    console.log(`로그인 : ${findUserId.user_id}`);
+    ctx.body = token;
 };
