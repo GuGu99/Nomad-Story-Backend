@@ -1,16 +1,14 @@
-// import Sequelize from 'sequelize';
-// import path from 'path';
+const Sequelize = require('sequelize');
+const env = process.env.NODE_ENV || 'development';
+const config = require('../config/config')[env];
+const db = {};
 
-// import { User } from './User';
+const sequelize = new Sequelize(config.database, config.username, config.password, config);
 
+db.User = require('./user')(sequelize,Sequelize);
+
+// 변경 필요
 // const config = require(path.join(__dirname, '..', 'config', 'dbconfig.json'))['test'];
-
-// const sequelize = new Sequelize(
-//     config.database,
-//     config.username,
-//     config.password,
-//     config  
-// )
 
 // const user = User(sequelize, Sequelize);
 
