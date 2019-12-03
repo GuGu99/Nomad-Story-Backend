@@ -1,4 +1,4 @@
-# Logs
+-# Logs
 logs
 *.log
 npm-debug.log*
@@ -59,6 +59,3 @@ typings/
 
 # next.js build output
 .next
-
-src/config/dbconfig.json
-test.js
