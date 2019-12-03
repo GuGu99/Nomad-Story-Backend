@@ -1,3 +1,5 @@
+import {regFormIsVaild, loginFormIsVaild} from '../middlewares/isCorrectForm';
+
 class LoginController {
     async register(ctx){
         
