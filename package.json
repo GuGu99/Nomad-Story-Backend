@@ -12,6 +12,8 @@
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
+    "koa-helmet": "^5.2.0",
+    "koa-logger": "^3.2.1",
     "koa-router": "^7.4.0",
     "mariadb": "^2.0.4",
     "moment": "^2.24.0",
@@ -24,7 +26,7 @@
     "sequelize-cli": "^5.4.0"
   },
   "scripts": {
-    "start": "cross-env NODE_PATH=src babel-node src/index.js",
+    "start": "cross-env NODE_PATH=server babel-node server/index.js",
     "dev": "cross-env NODE_PATH=src nodemon --exec babel-node src/index.js",
     "build": "babel --presets es2015 -d lib/ src"
   },
