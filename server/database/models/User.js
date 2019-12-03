@@ -1,5 +1,5 @@
-export const User = (sequelize, DataTypes) =>{
-    return sequelize.define('user', {
+module.exports = (sequelize, DataTypes) =>{
+    const User = sequelize.define('user', {
         user_id : {
             type : DataTypes.STRING(20),
             allowNull : false,
@@ -19,5 +19,11 @@ export const User = (sequelize, DataTypes) =>{
             allowNull : false,
             unique : true
         }
+    }, {
+        charset: "utf8",
+        collate: 'utf8_general_ci'
     });
-}
+    // that will add associate 
+    return User;
+};
+

@@ -1,2 +1,2 @@
-# Nomad-SNS_server
-Server for Nomad-SNS
+# Nomad-Story-Backend
+Server for Nomad-Story SNS Project
