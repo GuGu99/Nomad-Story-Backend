@@ -1,9 +1,11 @@
-const Sequelize = require('sequelize');
-const env = process.env.NODE_ENV || "development";
-const config = require('../config/dbconfig')[env];
-const db = {};
+import Sequelize from 'sequelize';
+import config from '../config/dbconfig';
 
-const sequelize = new Sequelize( config.username, config.database, config.password, config );
+const env = process.env.NODE_ENV || "development";
+const dbconfig = config[env];
+const sequelize = new Sequelize( dbconfig.username, dbconfig.database, dbconfig.password, config );
+
+const db = {};
 
 db.User = require('./user')(sequelize, Sequelize);
 

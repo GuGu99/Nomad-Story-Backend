@@ -1,5 +1,3 @@
-require('dotenv').config();
-
 module.exports = {
   development: {
     username: 'root',
@@ -8,7 +6,7 @@ module.exports = {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     dialect: 'mariadb',
-    operatorsAliases: false,
+    operatorsAliases: false
   },
   test: {
     username: 'root',
@@ -17,7 +15,7 @@ module.exports = {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     dialect: 'mariadb',
-    operatorsAliases: false,
+    operatorsAliases: false
   },
   production: {
     username: 'root',
@@ -26,7 +24,6 @@ module.exports = {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     dialect: 'mariadb',
-    operatorsAliases: false,
-  },
-  
+    operatorsAliases: false
+  }
 };
